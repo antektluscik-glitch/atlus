@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Magazyn Plików</title>
+    <title>Magazyk plików</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
@@ -21,7 +21,7 @@
 
         body {
             font-family: -apple-system, system-ui, sans-serif;
-            /* NOWY CIEMNY GRADIENT */
+            /* CZYSTY CIEMNY GRADIENT */
             background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
             color: var(--text);
             display: flex;
@@ -52,6 +52,7 @@
             padding: 14px !important;
             font-weight: 700 !important;
             border: none !important;
+            color: #fff !important;
         }
 
         #fileList { list-style: none; margin-top: 30px; }
@@ -129,7 +130,7 @@
     <div id="adminModal">
         <div class="modal-content">
             <h3>🔐 Autoryzacja</h3>
-            <input type="password" id="adminPassInput" placeholder="Hasło: Zamek135.">
+            <input type="password" id="adminPassInput" placeholder="Wpisz hasło administratora">
             <div class="modal-btns">
                 <button class="btn-cancel" onclick="closeModal()">Anuluj</button>
                 <button class="btn-confirm" onclick="confirmDelete()">Usuń</button>
@@ -171,6 +172,7 @@
         fileToDeleteId = id;
         document.getElementById('adminModal').style.display = 'flex';
         document.getElementById('adminPassInput').value = '';
+        document.getElementById('adminPassInput').focus();
     }
 
     function closeModal() {
@@ -201,6 +203,4 @@
 </script>
 </body>
 </html>
-
-
 
