@@ -3,83 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Podaj Plik</title>
+    <title>Baza Plików</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
     <style>
-        /* Twoje style pozostają bez zmian */
-        :root { --accent: #007bff; --danger: #ff4d4d; --text: #ffffff; --text-dim: #bbb; --glass: rgba(15, 15, 15, 0.8); --border: rgba(255, 255, 255, 0.1); }
-        * { box-sizing: border-box; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; } /* Blokada zaznaczania tekstu */
-        body { font-family: -apple-system, system-ui, sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background-image: url('czarne-tlo.png'); background-size: cover; background-position: center; background-attachment: fixed; background-color: #000; }
-        .container { background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 35px 25px; border-radius: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); width: 100%; max-width: 450px; text-align: center; border: 1px solid var(--border); }
-        h1 { margin: 0 0 10px 0; font-size: 26px; color: #fff; font-weight: 800; }
-        p { color: var(--text-dim); margin-bottom: 30px; font-size: 14px; }
-        .uploadcare--widget__button_type_open { background-color: var(--accent) !important; border-radius: 14px !important; width: 100% !important; padding: 14px !important; font-weight: 700 !important; font-size: 16px !important; box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3); border: none !important; }
+        :root {
+            --accent: #007bff;
+            --danger: #ff4d4d;
+            --text: #ffffff;
+            --glass: rgba(10, 10, 10, 0.9); /* Ciemniejsze, mniej przezroczyste tło dla czytelności */
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            /* TŁO */
+            background-image: url('czarne-tlo.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #000;
+        }
+
+        .container {
+            background: var(--glass);
+            padding: 35px 25px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        h1 { margin: 0 0 10px 0; font-size: 26px; font-weight: 800; }
+        p { color: #888; margin-bottom: 30px; font-size: 14px; }
+
+        .uploadcare--widget__button_type_open {
+            background-color: var(--accent) !important;
+            border-radius: 12px !important;
+            width: 100% !important;
+            padding: 12px !important;
+            font-weight: 700 !important;
+            border: none !important;
+        }
+
         #fileList { list-style: none; padding: 0; margin-top: 30px; }
-        #fileList li { background: rgba(255, 255, 255, 0.05); margin-bottom: 15px; padding: 16px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
-        .file-name { font-weight: 600; font-size: 15px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-        .actions { display: flex; gap: 10px; align-items: center; }
-        .btn-download { background: var(--accent); color: white; text-decoration: none; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; }
-        .btn-delete { background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.2); color: var(--danger); cursor: pointer; padding: 9px; border-radius: 12px; }
-        .status { color: var(--text-dim); font-style: italic; font-size: 14px; padding: 30px; }
+        
+        #fileList li {
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 12px;
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        .file-name { 
+            font-weight: 600; 
+            font-size: 15px; 
+            color: #fff; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            max-width: 160px;
+            text-align: left;
+        }
+        
+        .actions { display: flex; gap: 8px; align-items: center; }
+        
+        .btn-download {
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .btn-delete {
+            background: rgba(255, 77, 77, 0.1);
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            color: var(--danger);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .status { color: #666; font-style: italic; padding: 20px; }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div class="container">
+<body>
+
+    <div class="container">
         <h1>📦 Podaj Plik</h1>
-        <p>Bezpieczne przesyłanie plików.</p>
+        <p>Twoje centrum plików.</p>
+
         <input type="hidden" role="uploadcare-uploader" id="uploader" data-public-key="6b42d984d10961c51a51" />
-        <ul id="fileList"><li class="status">Pobieranie...</li></ul>
+
+        <ul id="fileList">
+            <li class="status">Ładowanie...</li>
+        </ul>
     </div>
 
 <script>
-    // Blokada klawiszy funkcyjnych
-    document.onkeydown = function(e) {
-        if(event.keyCode == 123) return false;
-        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-        if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
-        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
-    };
+    const SUPABASE_URL = 'https://evmuryxvdfcuauisgxye.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_BdjYm6QVu8AX4rKWrEmSeA_EiLCbVNn';
+    const ADMIN_PASSWORD = 'Zamek135.'; 
 
-    // Skrócona konfiguracja (utrudnia czytanie)
-    const _0x1 = 'https://evmuryxvdfcuauisgxye.supabase.co';
-    const _0x2 = 'sb_publishable_BdjYm6QVu8AX4rKWrEmSeA_EiLCbVNn';
-    const _0x3 = 'Zamek135.'; 
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const widget = uploadcare.Widget('#uploader');
+    const listElement = document.getElementById('fileList');
 
-    const _s = supabase.createClient(_0x1, _0x2);
-    const w = uploadcare.Widget('#uploader');
-    const l = document.getElementById('fileList');
-
-    async function load() {
-        const { data: d, error: e } = await _s.from('pliki').select('*').order('created_at', { ascending: false });
-        if (e) return;
-        l.innerHTML = d.length === 0 ? '<li class="status">Pusta lista.</li>' : '';
-        d.forEach(f => {
-            const i = document.createElement('li');
-            i.innerHTML = `<div class="file-info"><span class="file-name">${f.name}</span></div><div class="actions"><button class="btn-delete" onclick="del(${f.id})">🗑️</button><a href="${f.url}" class="btn-download" target="_blank">Pobierz</a></div>`;
-            l.appendChild(i);
-        });
-    }
-
-    async function del(id) {
-        const p = prompt("🔐:");
-        if (p === _0x3) {
-            await _s.from('pliki').delete().eq('id', id);
-            load();
+    async function loadFiles() {
+        try {
+            const { data, error } = await _supabase.from('pliki').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            
+            listElement.innerHTML = data.length === 0 ? '<li class="status">Brak plików.</li>' : '';
+            
+            data.forEach(file => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="file-name">${file.name}</span>
+                    <div class="actions">
+                        <button class="btn-delete" onclick="deleteFile('${file.id}')">🗑️</button>
+                        <a href="${file.url}" class="btn-download" target="_blank">Pobierz</a>
+                    </div>
+                `;
+                listElement.appendChild(li);
+            });
+        } catch (err) {
+            console.error("Błąd ładowania:", err);
         }
     }
 
-    w.onUploadComplete(async (info) => {
-        await _s.from('pliki').insert([{ name: info.name, url: info.originalUrl }]);
-        load();
+    async function deleteFile(fileId) {
+        const pass = prompt("Podaj hasło administratora:");
+        if (pass === ADMIN_PASSWORD) {
+            const { error } = await _supabase.from('pliki').delete().eq('id', fileId);
+            if (error) {
+                alert("Błąd bazy danych!");
+            } else {
+                loadFiles();
+            }
+        } else if (pass !== null) {
+            alert("Złe hasło!");
+        }
+    }
+
+    widget.onUploadComplete(async (info) => {
+        await _supabase.from('pliki').insert([{ name: info.name, url: info.originalUrl }]);
+        loadFiles();
     });
 
-    load();
-
-    // Ciągłe czyszczenie konsoli
-    setInterval(() => { console.clear(); }, 1000);
+    loadFiles();
 </script>
 </body>
 </html>
