@@ -1,114 +1,88 @@
 <!DOCTYPE html>
 <html lang="pl-PL">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lista Notatek</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-        color: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-    }
-
-    h1 {
-        margin-bottom: 20px;
-    }
-
-    input, button {
-        padding: 10px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: none;
-        margin-right: 10px;
-    }
-
-    input {
-        width: 300px;
-    }
-
-    button {
-        background: linear-gradient(90deg, #ff6a00, #ee0979);
-        color: white;
-        cursor: pointer;
-    }
-
-    button:hover {
-        opacity: 0.8;
-    }
-
-    ul {
-        list-style-type: none;
-        padding: 0;
-        margin-top: 20px;
-        width: 100%;
-        max-width: 500px;
-    }
-
-    li {
-        background: rgba(255,255,255,0.1);
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        word-wrap: break-word;
-    }
-</style>
+    <meta charset="UTF-8">
+    <title>Wspólne Pliki - Atluscik</title>
+    <script>
+        // TWOJE DANE Z OBRAZKÓW
+        const UPLOADCARE_PUBLIC_KEY = '6b42d984d10961c51a51';
+        const JSONBIN_BIN_ID = '6984e6c243b1c97be9682823'; // Z Twojego ostatniego screena
+        const JSONBIN_KEY = '$2a$10$jUG8DCYFDuiomPU7qoC0f.1kD30WGYv4rMtjB/k8h0MnG6qV8ZISK'; // Z Twojego drugiego screena
+    </script>
+    <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; text-align: center; padding: 40px; }
+        .box { background: #1a1a1a; padding: 30px; border-radius: 20px; border: 1px solid #333; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: #fff; margin-bottom: 25px; }
+        #fileList { list-style: none; padding: 0; margin-top: 30px; text-align: left; }
+        #fileList li { background: #252525; margin: 8px 0; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        a { background: #5c2d91; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9em; transition: 0.3s; }
+        a:hover { background: #7b3fc3; }
+        .uploadcare--widget { background: #333 !important; }
+    </style>
 </head>
 <body>
 
-<h1>Lista Notatek</h1>
-<div>
-    <input type="text" id="noteInput" placeholder="Wpisz notatkę...">
-    <button id="addBtn">Dodaj</button>
+<div class="box">
+    <h1>Pliki Atluscika</h1>
+    <p>Dodaj plik, a pojawi się on u każdego!</p>
+    
+    <input type="hidden" role="uploadcare-uploader" id="uploader" data-public-key="6b42d984d10961c51a51" />
+    
+    <ul id="fileList">Ładowanie listy plików...</ul>
 </div>
 
-<ul id="notesList"></ul>
-
 <script>
-const input = document.getElementById("noteInput");
-const addBtn = document.getElementById("addBtn");
-const notesList = document.getElementById("notesList");
+    const widget = uploadcare.Widget('#uploader');
+    const listElement = document.getElementById('fileList');
 
-// Funkcja do wczytania notatek z LocalStorage
-function loadNotes() {
-    const notes = JSON.parse(localStorage.getItem("notes") || "[]");
-    notesList.innerHTML = ""; // czyścimy listę
-    notes.forEach(note => {
-        const li = document.createElement("li");
-        li.textContent = note;
-        notesList.appendChild(li);
+    // 1. POBIERANIE LISTY DLA WSZYSTKICH
+    async function loadFiles() {
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                headers: { 'X-Master-Key': JSONBIN_KEY }
+            });
+            const data = await response.json();
+            // Obsługa zarówno pustego binu [] jak i obiektu {files: []}
+            const files = Array.isArray(data.record) ? data.record : (data.record.files || []);
+
+            listElement.innerHTML = files.length === 0 ? '<li>Brak plików. Bądź pierwszy!</li>' : '';
+            files.forEach(file => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${file.name}</span> <a href="${file.url}" target="_blank">Pobierz</a>`;
+                listElement.appendChild(li);
+            });
+        } catch (e) {
+            listElement.innerHTML = '<li>Błąd ładowania listy.</li>';
+        }
+    }
+
+    // 2. DODAWANIE PLIKU (SYNCHRONIZACJA)
+    widget.onUploadComplete(async (info) => {
+        listElement.innerHTML = '<li>Aktualizowanie listy...</li>';
+        
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_KEY }
+        });
+        const data = await response.json();
+        let currentFiles = Array.isArray(data.record) ? data.record : (data.record.files || []);
+
+        currentFiles.push({ name: info.name, url: info.originalUrl });
+
+        await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': JSONBIN_KEY
+            },
+            body: JSON.stringify(currentFiles)
+        });
+
+        loadFiles();
     });
-}
 
-// Funkcja do dodawania notatki
-function addNote() {
-    const noteText = input.value.trim();
-    if(noteText === "") return;
-    
-    const notes = JSON.parse(localStorage.getItem("notes") || "[]");
-    notes.push(noteText); // dodajemy nową notatkę na koniec
-    localStorage.setItem("notes", JSON.stringify(notes));
-    
-    input.value = "";
-    loadNotes();
-}
-
-// Wczytujemy notatki przy starcie
-loadNotes();
-
-// Obsługa kliknięcia przycisku
-addBtn.addEventListener("click", addNote);
-
-// Obsługa wciśnięcia Enter w polu input
-input.addEventListener("keydown", (e) => {
-    if(e.key === "Enter") addNote();
-});
+    loadFiles();
 </script>
 
 </body>
 </html>
-
