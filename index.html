@@ -2,7 +2,7 @@
 <html lang="pl-PL">
 <head>
     <meta charset="UTF-8">
-    <title>Pliki Atluscika</title>
+    <title>Wspólne Pliki</title>
     <script>
         const UPLOADCARE_PUBLIC_KEY = '6b42d984d10961c51a51';
         const JSONBIN_BIN_ID = '6984e6c243b1c97be9682823';
@@ -10,19 +10,24 @@
     </script>
     <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #111; color: #eee; text-align: center; padding: 20px; }
-        .box { background: #1e1e1e; padding: 25px; border-radius: 15px; max-width: 450px; margin: auto; border: 1px solid #333; }
-        #fileList { list-style: none; padding: 0; margin-top: 20px; }
-        #fileList li { background: #252525; margin: 8px 0; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; border: 1px solid #444; }
-        .btn { background: #007bff; color: white; text-decoration: none; padding: 5px 12px; border-radius: 5px; font-size: 13px; }
+        body { font-family: sans-serif; background: #0b0b0b; color: #fff; text-align: center; padding: 20px; }
+        .box { background: #161616; padding: 30px; border-radius: 20px; max-width: 450px; margin: 40px auto; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #fileList { list-style: none; padding: 0; margin-top: 25px; }
+        #fileList li { background: #222; margin: 10px 0; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .download-link { background: #007bff; color: white; text-decoration: none; padding: 7px 15px; border-radius: 8px; font-weight: bold; font-size: 13px; }
+        .loading { color: #888; font-style: italic; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>Wspólne Pliki</h1>
-        <input type="hidden" role="uploadcare-uploader" id="uploader" data-public-key="6b42d984d10961c51a51" />
-        <ul id="fileList">Ładowanie...</ul>
-    </div>
+
+<div class="box">
+    <h1>Podaj Plik Dalej</h1>
+    <p style="color:#888">Wszystko co wrzucisz, widzą inni.</p>
+    
+    <input type="hidden" role="uploadcare-uploader" id="uploader" data-public-key="6b42d984d10961c51a51" />
+    
+    <ul id="fileList"><li class="loading">Sprawdzanie połączenia z bazą...</li></ul>
+</div>
 
 <script>
     const widget = uploadcare.Widget('#uploader');
@@ -31,47 +36,56 @@
     async function loadFiles() {
         try {
             const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                headers: { 'X-Master-Key': JSONBIN_KEY, 'X-Bin-Meta': 'false' }
+                headers: { 
+                    'X-Master-Key': JSONBIN_KEY,
+                    'X-Bin-Meta': 'false'
+                }
             });
             const data = await response.json();
             
-            // Inteligentne szukanie listy plików w danych z JSONbin
-            let files = [];
-            if (Array.isArray(data)) files = data;
-            else if (data.files && Array.isArray(data.files)) files = data.files;
-            else if (data.record && Array.isArray(data.record.files)) files = data.record.files;
+            // Obsługa różnych formatów danych
+            let files = data.files || (Array.isArray(data) ? data : []);
 
-            listElement.innerHTML = files.length === 0 ? '<li>Lista jest pusta.</li>' : '';
-            files.forEach(file => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span>${file.name}</span> <a href="${file.url}" class="btn" target="_blank">Pobierz</a>`;
-                listElement.appendChild(li);
-            });
+            if (files.length === 0) {
+                listElement.innerHTML = '<li class="loading">Lista jest pusta. Wrzuć pierwszy plik!</li>';
+            } else {
+                listElement.innerHTML = '';
+                files.reverse().forEach(file => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${file.name}</span> <a href="${file.url}" class="download-link" target="_blank">Pobierz</a>`;
+                    listElement.appendChild(li);
+                });
+            }
         } catch (e) {
-            listElement.innerHTML = '<li style="color:red">Błąd bazy. Sprawdź JSONbin!</li>';
+            listElement.innerHTML = '<li style="color:#ff4d4d">Błąd bazy danych. Spróbuj odświeżyć (F5).</li>';
         }
     }
 
     widget.onUploadComplete(async (info) => {
-        listElement.innerHTML = '<li>Zapisywanie linku...</li>';
+        listElement.innerHTML = '<li class="loading">Aktualizowanie listy plików...</li>';
         try {
-            const resp = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
                 headers: { 'X-Master-Key': JSONBIN_KEY, 'X-Bin-Meta': 'false' }
             });
-            let data = await resp.json();
+            let data = await res.json();
             let currentFiles = data.files || (Array.isArray(data) ? data : []);
-            
+
             currentFiles.push({ name: info.name, url: info.originalUrl });
 
-            await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+            const update = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': JSONBIN_KEY 
+                },
                 body: JSON.stringify({ files: currentFiles })
             });
-            setTimeout(loadFiles, 1000);
+
+            if (update.ok) {
+                loadFiles(); // Odśwież listę bez przeładowania strony
+            }
         } catch (err) {
-            alert("Błąd zapisu linku. Odśwież stronę.");
-            loadFiles();
+            alert("Plik wysłany, ale wystąpił błąd zapisu na liście. Odśwież stronę.");
         }
     });
 
