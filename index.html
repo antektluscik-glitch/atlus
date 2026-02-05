@@ -1,97 +1,114 @@
 <!DOCTYPE html>
 <html lang="pl-PL">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stronka</title>
-
-    <style>
-        body {
-            background-color: blanchedalmond;
-            margin: 0;
-            display: flex;
-            flex-wrap: wrap;
-            
-        }
-
-        #gora {
-            background-color: burlywood;
-            width: 100%;
-            height: 75px;
-        }
-
-        #lewy {
-            width: 33%;
-            height: 1000px;
-        }
-
-        #main {
-            width: 34%;
-            height: 1000px;
-            background-color: burlywood;
-        }
-
-        #prawy {
-            width: 33%;
-            height: 1000px;
-        }
-
-        #pasek {
-            margin-top: 12px;
-            margin-left: 5px;
-            width: 99%;
-            height: 50px;
-            background-color: white;
-        }
-
-        canvas {
-            display: block;
-        }
-       
-
-    </style>
-</head>
-
-<body>
-
-<header id="gora">
-    <section id="pasek">
-        <canvas id="ticker" width="2490" height="50" style="border: solid black 1px"></canvas>
-    </section>
-</header>
-
-<section id="lewy"></section>
-<section id="main"></section>
-<section id="prawy"></section>
-
-<script>
-    const canvas = document.getElementById("ticker");
-    const ctx = canvas.getContext("2d");
-
-    const message = "Witamy na stronie! | Programowanie | Gry | Klasa 2 Technikum | Troche o mnie | ";
-    let x = canvas.width;
-
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.font = "24px Arial";
-        ctx.fillStyle = "black";
-        ctx.textBaseline = "middle";
-
-        ctx.fillText(message, x, canvas.height / 2);
-
-        x -= 2; 
-
-        const textWidth = ctx.measureText(message).width;
-        if (x < -textWidth) {
-            x = canvas.width;
-        }
-
-        requestAnimationFrame(animate);
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista Notatek</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
     }
 
-    animate();
+    h1 {
+        margin-bottom: 20px;
+    }
+
+    input, button {
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: none;
+        margin-right: 10px;
+    }
+
+    input {
+        width: 300px;
+    }
+
+    button {
+        background: linear-gradient(90deg, #ff6a00, #ee0979);
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        opacity: 0.8;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    li {
+        background: rgba(255,255,255,0.1);
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        word-wrap: break-word;
+    }
+</style>
+</head>
+<body>
+
+<h1>Lista Notatek</h1>
+<div>
+    <input type="text" id="noteInput" placeholder="Wpisz notatkę...">
+    <button id="addBtn">Dodaj</button>
+</div>
+
+<ul id="notesList"></ul>
+
+<script>
+const input = document.getElementById("noteInput");
+const addBtn = document.getElementById("addBtn");
+const notesList = document.getElementById("notesList");
+
+// Funkcja do wczytania notatek z LocalStorage
+function loadNotes() {
+    const notes = JSON.parse(localStorage.getItem("notes") || "[]");
+    notesList.innerHTML = ""; // czyścimy listę
+    notes.forEach(note => {
+        const li = document.createElement("li");
+        li.textContent = note;
+        notesList.appendChild(li);
+    });
+}
+
+// Funkcja do dodawania notatki
+function addNote() {
+    const noteText = input.value.trim();
+    if(noteText === "") return;
+    
+    const notes = JSON.parse(localStorage.getItem("notes") || "[]");
+    notes.push(noteText); // dodajemy nową notatkę na koniec
+    localStorage.setItem("notes", JSON.stringify(notes));
+    
+    input.value = "";
+    loadNotes();
+}
+
+// Wczytujemy notatki przy starcie
+loadNotes();
+
+// Obsługa kliknięcia przycisku
+addBtn.addEventListener("click", addNote);
+
+// Obsługa wciśnięcia Enter w polu input
+input.addEventListener("keydown", (e) => {
+    if(e.key === "Enter") addNote();
+});
 </script>
 
 </body>
 </html>
+
