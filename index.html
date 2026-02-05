@@ -3,156 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wspólne Pliki</title>
+    <title>Podaj Plik - Secure Admin</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
     <style>
         :root {
-            --bg: #0a0a0a;
-            --card: #141414;
             --accent: #007bff;
-            --accent-hover: #0056b3;
-            --text: #e0e0e0;
-            --text-dim: #888;
-            --border: #262626;
+            --danger: #ff4d4d;
+            --text: #ffffff;
+            --text-dim: #bbb;
+            --glass: rgba(15, 15, 15, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
         * { box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
             margin: 0;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Lepiej dla długich list na mobile */
+            align-items: center;
             min-height: 100vh;
             padding: 20px;
+            /* TŁO Z TWOJEGO PLIKU NA GITHUBIE */
+            background-image: url('czarne-tlo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #000;
         }
 
         .container {
-            background: var(--card);
-            padding: 30px 20px;
-            border-radius: 28px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            background: var(--glass);
+            backdrop-filter: blur(15px); /* Efekt rozmycia szkła */
+            -webkit-backdrop-filter: blur(15px);
+            padding: 35px 25px;
+            border-radius: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             width: 100%;
-            max-width: 440px;
+            max-width: 450px;
             text-align: center;
             border: 1px solid var(--border);
-            margin-top: 20px;
         }
 
-        h1 { 
-            margin: 0 0 10px 0; 
-            font-size: 24px; 
-            letter-spacing: -0.5px;
-        }
+        h1 { margin: 0 0 10px 0; font-size: 26px; color: #fff; font-weight: 800; }
+        p { color: var(--text-dim); margin-bottom: 30px; font-size: 14px; }
 
-        p { 
-            color: var(--text-dim); 
-            margin-bottom: 25px; 
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Stylizacja przycisku Uploadcare */
-        .uploadcare--widget {
-            display: block !important;
-            margin: 0 auto !important;
-        }
-        
+        /* Styl widgetu Uploadcare */
         .uploadcare--widget__button_type_open {
             background-color: var(--accent) !important;
-            border: none !important;
-            padding: 12px 24px !important;
+            border-radius: 14px !important;
+            width: 100% !important;
+            padding: 14px !important;
+            font-weight: 700 !important;
             font-size: 16px !important;
-            font-weight: 600 !important;
-            border-radius: 12px !important;
-            width: 100% !important; /* Na mobile przycisk na całą szerokość */
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+            border: none !important;
         }
 
-        #fileList {
-            list-style: none;
-            padding: 0;
-            margin-top: 30px;
-        }
-
+        #fileList { list-style: none; padding: 0; margin-top: 30px; }
+        
         #fileList li {
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 15px;
             padding: 16px;
-            border-radius: 16px;
+            border-radius: 18px;
             display: flex;
-            flex-direction: column; /* Nazwa nad przyciskiem na mobile */
-            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
             border: 1px solid var(--border);
-            text-align: left;
+            transition: all 0.3s ease;
         }
 
-        /* Na większych ekranach (komputer) wracamy do układu w jednej linii */
-        @media (min-width: 400px) {
-            #fileList li {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
+        #fileList li:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.02);
         }
 
-        .file-name {
-            font-weight: 500;
-            font-size: 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #fff;
+        .file-info { display: flex; flex-direction: column; text-align: left; overflow: hidden; }
+        .file-name { 
+            font-weight: 600; 
+            font-size: 15px; 
+            color: #fff; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            max-width: 180px;
         }
-
+        
+        .actions { display: flex; gap: 10px; align-items: center; }
+        
         .btn-download {
-            background: transparent;
-            color: var(--accent);
+            background: var(--accent);
+            color: white;
             text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 14px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 13px;
             font-weight: 700;
-            border: 1.5px solid var(--accent);
-            text-align: center;
             transition: 0.2s;
         }
 
-        .btn-download:hover {
-            background: var(--accent);
-            color: white;
+        .btn-download:hover { background: #0069d9; }
+
+        .btn-delete {
+            background: rgba(255, 77, 77, 0.1);
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            color: var(--danger);
+            cursor: pointer;
+            padding: 9px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
         }
 
-        .status { 
-            color: var(--text-dim); 
-            font-style: italic; 
-            font-size: 14px;
-            padding: 20px;
+        .btn-delete:hover { 
+            background: var(--danger); 
+            color: white; 
         }
+
+        .status { color: var(--text-dim); font-style: italic; font-size: 14px; padding: 30px; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>📦 Podaj Plik</h1>
-        <p>Przechowaj Pliki<br>Dostępna z każdego urządzenia.</p>
+        <p>Bezpieczne przesyłanie plików.</p>
 
-        <input type="hidden" role="uploadcare-uploader" id="uploader" 
-               data-public-key="6b42d984d10961c51a51" />
+        <input type="hidden" role="uploadcare-uploader" id="uploader" data-public-key="6b42d984d10961c51a51" />
 
         <ul id="fileList">
-            <li class="status">Szukanie plików...</li>
+            <li class="status">Pobieranie listy plików...</li>
         </ul>
     </div>
 
 <script>
     const SUPABASE_URL = 'https://evmuryxvdfcuauisgxye.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_BdjYm6QVu8AX4rKWrEmSeA_EiLCbVNn';
+    
+    // TWOJE NOWE HASŁO
+    const MY_SECRET_PASSWORD = 'Zamek135.'; 
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const widget = uploadcare.Widget('#uploader');
@@ -160,15 +156,11 @@
 
     async function loadFiles() {
         try {
-            const { data, error } = await _supabase
-                .from('pliki')
-                .select('*')
-                .order('created_at', { ascending: false });
-
+            const { data, error } = await _supabase.from('pliki').select('*').order('created_at', { ascending: false });
             if (error) throw error;
-
-            if (!data || data.length === 0) {
-                listElement.innerHTML = '<li class="status">Tu jeszcze nic nie ma. Wrzuć coś!</li>';
+            
+            if (data.length === 0) {
+                listElement.innerHTML = '<li class="status">Baza danych jest pusta.</li>';
                 return;
             }
 
@@ -176,32 +168,50 @@
             data.forEach(file => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <span class="file-name">${file.name}</span>
-                    <a href="${file.url}" class="btn-download" target="_blank">Pobierz</a>
+                    <div class="file-info">
+                        <span class="file-name" title="${file.name}">${file.name}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-delete" onclick="deleteFile(${file.id})" title="Usuń plik">🗑️</button>
+                        <a href="${file.url}" class="btn-download" target="_blank">Pobierz</a>
+                    </div>
                 `;
                 listElement.appendChild(li);
             });
-        } catch (err) {
-            listElement.innerHTML = '<li class="status" style="color:#ff4d4d">Błąd połączenia.</li>';
+        } catch (err) { 
+            console.error(err);
+            listElement.innerHTML = '<li class="status">Błąd ładowania danych.</li>';
+        }
+    }
+
+    async function deleteFile(id) {
+        const password = prompt("🔐 Podaj hasło, aby usunąć plik:");
+        
+        if (password === null) return; // Anulowano
+
+        if (password === MY_SECRET_PASSWORD) {
+            const { error } = await _supabase.from('pliki').delete().eq('id', id);
+            if (error) {
+                alert("❌ Błąd podczas usuwania pliku z bazy.");
+            } else {
+                loadFiles(); // Odśwież listę
+            }
+        } else {
+            alert("⚠️ Niepoprawne hasło! Odmowa dostępu.");
         }
     }
 
     widget.onUploadComplete(async (info) => {
-        listElement.innerHTML = '<li class="status">Dodawanie...</li>';
-        try {
-            const { error } = await _supabase
-                .from('pliki')
-                .insert([{ name: info.name, url: info.originalUrl }]);
-            if (error) throw error;
-            loadFiles();
-        } catch (err) {
-            alert("Błąd zapisu!");
-            loadFiles();
+        const { error } = await _supabase.from('pliki').insert([{ name: info.name, url: info.originalUrl }]);
+        if (error) {
+            alert("Błąd zapisu pliku na liście!");
         }
+        loadFiles();
     });
 
     loadFiles();
 </script>
 </body>
 </html>
+
 
