@@ -43,7 +43,7 @@
         h2 { font-size: 18px; margin-bottom: 12px; color: var(--accent); text-align: center; }
 
         .upload-info { text-align: center; font-size: 13px; color: #00ff88; margin-bottom: 8px; font-weight: bold; }
-        .uploader-wrapper { display: flex; justify-content: center; margin-bottom: 15px; }
+        .uploader-wrapper { display: flex; justify-content: center; margin-bottom: 15px; min-height: 50px; }
 
         .frame-container {
             flex-grow: 1; width: 100%; background: #fff;
@@ -105,22 +105,6 @@
     </div>
 
 <script>
-    // Blokada narzędzi deweloperskich
-    document.addEventListener('keydown', e => {
-        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode == 85)) {
-            e.preventDefault();
-        }
-    });
-
-    (function() {
-        setInterval(() => {
-            if (window.outerHeight - window.innerHeight > 160 || window.outerWidth - window.innerWidth > 160) {
-                document.body.innerHTML = "<div style='background:#000;color:#fff;height:100vh;display:flex;align-items:center;justify-content:center;'>Dostęp zablokowany.</div>";
-            }
-            debugger;
-        }, 500);
-    })();
-
     const PASS = "ok123123";
     const SUPABASE_URL = 'https://evmuryxvdfcuauisgxye.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_BdjYm6QVu8AX4rKWrEmSeA_EiLCbVNn';
@@ -129,6 +113,13 @@
     const widget = uploadcare.Widget('#uploader');
     const listElement = document.getElementById('fileList');
     let fileToDeleteId = null;
+
+    // Fix na zacinający się widget - czyści go po uploadzie
+    widget.onUploadComplete(async (info) => {
+        await _supabase.from('pliki').insert([{ name: info.name, url: info.originalUrl }]);
+        widget.value(null); // To czyści napis z nazwą pliku z ekranu
+        loadFiles();
+    });
 
     async function loadFiles() {
         const { data, error } = await _supabase.from('pliki').select('*').order('created_at', { ascending: false });
@@ -162,9 +153,9 @@
         } else { alert("Złe hasło!"); }
     }
 
-    widget.onUploadComplete(async (info) => {
-        await _supabase.from('pliki').insert([{ name: info.name, url: info.originalUrl }]);
-        loadFiles();
+    // Blokady konsoli
+    document.addEventListener('keydown', e => {
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode == 85)) e.preventDefault();
     });
 
     loadFiles();
