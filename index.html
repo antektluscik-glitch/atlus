@@ -10,35 +10,19 @@
     <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
     <style>
-        :root { 
-            --accent: #007bff; 
-            --danger: #ff4d4d; 
-            --bg: #000000; 
-            --card: #111111; 
-            --border: rgba(255, 255, 255, 0.1); 
-        }
-
+        :root { --accent: #007bff; --danger: #ff4d4d; --bg: #000000; --card: #111111; --border: rgba(255, 255, 255, 0.1); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%); 
-            color: #fff; 
-            padding: 15px; 
-            overflow-x: hidden;
-            -webkit-user-select: none;
-            user-select: none;
+            color: #fff; padding: 15px; overflow-x: hidden;
+            -webkit-user-select: none; user-select: none;
         }
 
         .main-wrapper {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 15px;
-            width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
+            display: flex; flex-direction: row; justify-content: center;
+            align-items: flex-start; gap: 15px; width: 100%; max-width: 100%; margin: 0 auto;
         }
 
         @media (max-width: 1300px) {
@@ -47,71 +31,40 @@
         }
 
         .column {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 20px;
-            height: 90vh; /* Dynamiczna wysokość zależna od ekranu */
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 20px; height: 90vh;
+            display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        /* POSZERZONE PANELE BOCZNE - PLAN I ZASTĘPSTWA */
         .side { width: 37%; }
         .center { width: 26%; border-color: var(--accent); box-shadow: 0 0 25px rgba(0, 123, 255, 0.15); }
 
-        h1 { font-size: 26px; margin-bottom: 5px; text-align: center; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
-        h2 { font-size: 18px; margin-bottom: 12px; color: var(--accent); text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+        h1 { font-size: 26px; margin-bottom: 5px; text-align: center; }
+        h2 { font-size: 18px; margin-bottom: 12px; color: var(--accent); text-align: center; }
 
-        .upload-info {
-            text-align: center;
-            font-size: 13px;
-            color: #00ff88;
-            margin-bottom: 8px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .uploader-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
+        .upload-info { text-align: center; font-size: 13px; color: #00ff88; margin-bottom: 8px; font-weight: bold; }
+        .uploader-wrapper { display: flex; justify-content: center; margin-bottom: 15px; }
 
         .frame-container {
-            flex-grow: 1;
-            width: 100%;
-            background: #fff;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 2px solid #222;
+            flex-grow: 1; width: 100%; background: #fff;
+            border-radius: 16px; overflow: hidden; border: 2px solid #222;
         }
 
         iframe { width: 100%; height: 100%; border: none; }
 
-        #fileList { list-style: none; overflow-y: auto; flex-grow: 1; padding-right: 5px; }
-        #fileList::-webkit-scrollbar { width: 5px; }
-        #fileList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
+        #fileList { list-style: none; overflow-y: auto; flex-grow: 1; }
         #fileList li { 
             background: #181818; padding: 10px 15px; border-radius: 14px; 
             margin-bottom: 8px; display: flex; justify-content: space-between; 
             align-items: center; border: 1px solid var(--border);
-            transition: 0.2s;
         }
-        #fileList li:hover { border-color: var(--accent); background: #1c1c1c; }
 
-        .btn-download { background: var(--accent); color: white; text-decoration: none; padding: 7px 12px; border-radius: 8px; font-weight: bold; font-size: 11px; transition: 0.2s; }
-        .btn-download:hover { opacity: 0.8; transform: scale(1.05); }
-        
-        .btn-delete { background: rgba(255, 77, 77, 0.05); border: 1px solid rgba(255, 77, 77, 0.3); color: var(--danger); cursor: pointer; padding: 7px; border-radius: 8px; transition: 0.2s; }
-        .btn-delete:hover { background: var(--danger); color: white; }
+        .btn-download { background: var(--accent); color: white; text-decoration: none; padding: 7px 12px; border-radius: 8px; font-weight: bold; font-size: 11px; }
+        .btn-delete { background: rgba(255, 77, 77, 0.05); border: 1px solid rgba(255, 77, 77, 0.3); color: var(--danger); cursor: pointer; padding: 7px; border-radius: 8px; }
 
         #adminModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(5px); }
-        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 28px; border: 1px solid var(--border); width: 340px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,1); }
-        input[type="password"] { width: 100%; padding: 14px; margin: 20px 0; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; text-align: center; font-size: 18px; outline: none; }
-        input[type="password"]:focus { border-color: var(--accent); }
+        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 28px; border: 1px solid var(--border); width: 340px; text-align: center; }
+        input[type="password"] { width: 100%; padding: 14px; margin: 20px 0; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; text-align: center; font-size: 18px; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -120,7 +73,7 @@
         <div class="column side">
             <h2>🗓️ Plan Lekcji 2H</h2>
             <div class="frame-container">
-                <iframe src="https://api.allorigins.win/raw?url=https://plan.zse.bydgoszcz.pl/plany/o14.html"></iframe>
+                <iframe src="https://api.allorigins.win/raw?url=https://plan.zse.bydgoszcz.pl/plany/o13.html"></iframe>
             </div>
         </div>
 
@@ -130,7 +83,7 @@
             <div class="uploader-wrapper">
                 <input type="hidden" role="uploadcare-uploader" id="uploader" data-public-key="6b42d984d10961c51a51" />
             </div>
-            <p style="text-align: center; color: #555; font-size: 12px; margin-bottom: 12px; letter-spacing: 1px;">MAGAZYN KLASY 2H</p>
+            <p style="text-align: center; color: #555; font-size: 12px; margin-bottom: 12px;">MAGAZYN KLASY 2H</p>
             <ul id="fileList"></ul>
         </div>
 
@@ -146,32 +99,27 @@
         <div class="modal-content">
             <h3 style="color: var(--danger);">🔒 Wymagana Autoryzacja</h3>
             <input type="password" id="adminPassInput" placeholder="Podaj hasło">
-            <button onclick="confirmDelete()" style="width:100%; background:var(--danger); color:#fff; padding:14px; border:none; border-radius:12px; cursor:pointer; font-weight:bold; font-size: 16px;">USUŃ NA ZAWSZE</button>
-            <button onclick="closeModal()" style="background:none; color:#666; border:none; margin-top:15px; cursor:pointer; font-size: 14px;">Wróć</button>
+            <button onclick="confirmDelete()" style="width:100%; background:var(--danger); color:#fff; padding:14px; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">USUŃ NA ZAWSZE</button>
+            <button onclick="closeModal()" style="background:none; color:#666; border:none; margin-top:15px; cursor:pointer;">Anuluj</button>
         </div>
     </div>
 
 <script>
-    // BLOKADA NARZĘDZI DEWELOPERSKICH I KONSOLI
+    // Blokada konsoli i narzędzi
     document.addEventListener('keydown', e => {
         if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode == 85)) {
             e.preventDefault();
-            return false;
         }
     });
 
-    // Skuteczny Anti-Console i Debugger
+    // Anti-DevTools
     (function() {
-        var devtools = function() {};
-        devtools.toString = function() {
-            return 't';
-        };
-        setInterval(function() {
+        setInterval(() => {
             if (window.outerHeight - window.innerHeight > 160 || window.outerWidth - window.innerWidth > 160) {
-                document.body.innerHTML = "<div style='display:flex;justify-content:center;align-items:center;height:100vh;color:white;background:black;font-family:sans-serif;'>Wykryto próbę otwarcia konsoli. Strona zablokowana.</div>";
+                document.body.innerHTML = "<div style='background:#000;color:#fff;height:100vh;display:flex;align-items:center;justify-content:center;'>Konsola jest zablokowana.</div>";
             }
             debugger;
-        }, 1000);
+        }, 500);
     })();
 
     const PASS = "ok123123";
@@ -186,10 +134,10 @@
     async function loadFiles() {
         const { data, error } = await _supabase.from('pliki').select('*').order('created_at', { ascending: false });
         if (!error) {
-            listElement.innerHTML = data.length ? '' : '<li style="color:#444; border:none; justify-content:center;">Brak nowych plików na serwerze</li>';
+            listElement.innerHTML = data.length ? '' : '<li style="color:#444; border:none; justify-content:center;">Brak nowych plików</li>';
             data.forEach(file => {
                 const li = document.createElement('li');
-                li.innerHTML = `<span title="${file.name}" style="font-size:12px; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight: 500;">${file.name}</span>
+                li.innerHTML = `<span style="font-size:12px; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${file.name}</span>
                 <div style="display:flex; gap:8px;">
                     <button class="btn-delete" onclick="openDeleteModal('${file.id}')">🗑️</button>
                     <a href="${file.url}" class="btn-download" target="_blank">Pobierz</a>
@@ -203,21 +151,16 @@
         fileToDeleteId = id;
         document.getElementById('adminModal').style.display = 'flex';
         document.getElementById('adminPassInput').value = '';
-        document.getElementById('adminPassInput').focus();
     }
 
     function closeModal() { document.getElementById('adminModal').style.display = 'none'; }
 
     async function confirmDelete() {
         if (document.getElementById('adminPassInput').value === PASS) {
-            const { error } = await _supabase.from('pliki').delete().eq('id', fileToDeleteId);
-            if (!error) {
-                closeModal();
-                loadFiles();
-            }
-        } else {
-            alert("Nieprawidłowe hasło administratora.");
-        }
+            await _supabase.from('pliki').delete().eq('id', fileToDeleteId);
+            closeModal();
+            loadFiles();
+        } else { alert("Złe hasło!"); }
     }
 
     widget.onUploadComplete(async (info) => {
@@ -229,4 +172,3 @@
 </script>
 </body>
 </html>
-
