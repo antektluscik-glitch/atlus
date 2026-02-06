@@ -3,96 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magazyn plików 2H</title>
+    <title>a_tluscik</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
     <style>
-        :root { --accent: #007bff; --danger: #ff4d4d; --text: #ffffff; --card-bg: #111111; --border: rgba(255, 255, 255, 0.1); }
+        :root { --accent: #007bff; --danger: #ff4d4d; --bg: #000000; --card: #111111; --border: rgba(255, 255, 255, 0.1); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%); color: var(--text); min-height: 100vh; padding: 20px; }
-        
-        .main-container {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr;
+        body { font-family: sans-serif; background: var(--bg); color: #fff; padding: 20px; overflow-x: hidden; }
+
+        /* WYMUSZENIE UKŁADU POZIOMEGO */
+        .main-wrapper {
+            display: flex;
+            flex-direction: row; /* Elementy obok siebie */
+            justify-content: center;
+            align-items: flex-start;
             gap: 20px;
-            max-width: 1400px;
-            margin: 40px auto;
-            align-items: start;
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
         }
 
-        @media (max-width: 1000px) { .main-container { grid-template-columns: 1fr; } }
+        /* Responsywność dla telefonów - tutaj będą pod sobą */
+        @media (max-width: 1100px) {
+            .main-wrapper { flex-direction: column; align-items: center; }
+            .column { width: 100% !important; max-width: 500px; }
+        }
 
-        .panel { background: var(--card-bg); padding: 25px; border-radius: 24px; border: 1px solid var(--border); text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        .center-panel { border-color: var(--accent); box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
+        .column {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            height: 800px; /* Stała wysokość dla wyrównania */
+            display: flex;
+            flex-direction: column;
+        }
 
-        h1 { margin-bottom: 8px; font-size: 26px; font-weight: 800; }
-        h2 { font-size: 18px; margin-bottom: 15px; color: var(--accent); }
-        
-        .btn-link { display: block; background: #181818; color: white; text-decoration: none; padding: 15px; border-radius: 12px; border: 1px solid var(--border); transition: 0.3s; font-weight: bold; margin-top: 10px; }
-        .btn-link:hover { background: var(--accent); transform: translateY(-3px); }
+        .side { width: 25%; }
+        .center { width: 40%; border-color: var(--accent); }
 
-        .uploadcare--widget__button_type_open { background-color: var(--accent) !important; border-radius: 12px !important; width: 100% !important; padding: 14px !important; font-weight: 700 !important; border: none !important; }
-        
-        #fileList { list-style: none; margin-top: 30px; text-align: left; }
-        #fileList li { background: #181818; margin-bottom: 10px; padding: 12px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
-        .file-name { font-weight: 600; font-size: 13px; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
-        
-        .btn-download { background: var(--accent); color: white; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; }
-        .btn-delete { background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.2); color: var(--danger); cursor: pointer; padding: 6px; border-radius: 8px; }
+        h2 { font-size: 1.2rem; margin-bottom: 15px; color: var(--accent); text-align: center; }
 
-        #adminModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; z-index: 9999; }
-        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 24px; border: 1px solid var(--border); width: 90%; max-width: 320px; text-align: center; }
-        .modal-content input { width: 100%; padding: 12px; margin: 20px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; text-align: center; font-size: 16px; }
-        .modal-btns { display: flex; gap: 10px; }
-        .modal-btns button { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; }
-        .btn-confirm { background: var(--danger); color: white; }
-        .btn-cancel { background: #333; color: white; }
+        /* Kontener na plan/zastępstwa */
+        .frame-container {
+            flex-grow: 1;
+            width: 100%;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Styl listy plików */
+        #fileList { list-style: none; margin-top: 20px; overflow-y: auto; }
+        #fileList li { 
+            background: #1a1a1a; padding: 12px; border-radius: 10px; 
+            margin-bottom: 8px; display: flex; justify-content: space-between; 
+            align-items: center; border: 1px solid var(--border);
+        }
+        .btn-download { background: var(--accent); color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; }
+        .btn-delete { background: none; border: 1px solid var(--danger); color: var(--danger); cursor: pointer; padding: 6px; border-radius: 6px; }
+
+        #adminModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 20px; width: 300px; text-align: center; }
+        input[type="password"] { width: 100%; padding: 10px; margin: 15px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-    <div class="main-container">
-        <div class="panel">
-            <h2>🗓️ Plan Lekcji</h2>
-            <p style="color: #666; font-size: 13px; margin-bottom: 10px;">Klasa 2H</p>
-            <a href="https://plan.zse.bydgoszcz.pl/plany/o15.html" target="_blank" class="btn-link">Otwórz Plan</a>
+    <div class="main-wrapper">
+        <div class="column side">
+            <h2>🗓️ Plan 2H</h2>
+            <div class="frame-container">
+                <iframe src="https://api.allorigins.win/raw?url=https://plan.zse.bydgoszcz.pl/plany/o16.html"></iframe>
+            </div>
         </div>
 
-        <div class="panel center-panel">
-            <h1>📦 Podaj Plik</h1>
-            <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Materiały 2H</p>
+        <div class="column center">
+            <h2 style="color: #fff;">📦 Magazyn Plików</h2>
             <input type="hidden" role="uploadcare-uploader" id="uploader" data-public-key="6b42d984d10961c51a51" />
             <ul id="fileList"></ul>
         </div>
 
-        <div class="panel">
+        <div class="column side">
             <h2>⚠️ Zastępstwa</h2>
-            <p style="color: #666; font-size: 13px; margin-bottom: 10px;">ZSE Bydgoszcz</p>
-            <a href="https://zastepstwa.zse.bydgoszcz.pl" target="_blank" class="btn-link">Otwórz Listę</a>
+            <div class="frame-container">
+                <iframe src="https://api.allorigins.win/raw?url=https://zastepstwa.zse.bydgoszcz.pl"></iframe>
+            </div>
         </div>
     </div>
 
     <div id="adminModal">
         <div class="modal-content">
-            <h3>🔐 Autoryzacja</h3>
-            <input type="password" id="adminPassInput" placeholder="Hasło">
-            <div class="modal-btns">
-                <button class="btn-cancel" onclick="closeModal()">Anuluj</button>
-                <button class="btn-confirm" onclick="confirmDelete()">Usuń</button>
-            </div>
+            <h3>Hasło Administratora</h3>
+            <input type="password" id="adminPassInput">
+            <button onclick="confirmDelete()" style="width:100%; background:var(--danger); color:#fff; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">USUŃ</button>
+            <button onclick="closeModal()" style="background:none; color:#666; border:none; margin-top:10px; cursor:pointer;">Anuluj</button>
         </div>
     </div>
 
 <script>
-    document.addEventListener('keydown', e => {
-        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode == 85)) e.preventDefault();
-    });
-    setInterval(() => { debugger; }, 100);
-
+    const PASS = "ok123123";
     const SUPABASE_URL = 'https://evmuryxvdfcuauisgxye.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_BdjYm6QVu8AX4rKWrEmSeA_EiLCbVNn';
-    const PASS = 'Zamek135.'; 
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const widget = uploadcare.Widget('#uploader');
@@ -100,34 +115,27 @@
     let fileToDeleteId = null;
 
     async function loadFiles() {
-        const { data, error } = await _supabase.from('pliki').select('*').order('created_at', { ascending: false });
-        if (!error) {
-            listElement.innerHTML = data.length ? '' : '<li style="color:#555; text-align:center; list-style:none;">Brak plików</li>';
-            data.forEach(file => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span class="file-name">${file.name}</span><div class="actions"><button class="btn-delete" onclick="openDeleteModal('${file.id}')">🗑️</button><a href="${file.url}" class="btn-download" target="_blank">Pobierz</a></div>`;
-                listElement.appendChild(li);
-            });
-        }
+        const { data } = await _supabase.from('pliki').select('*').order('created_at', { ascending: false });
+        listElement.innerHTML = '';
+        data?.forEach(file => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span style="font-size:13px; max-width:120px; overflow:hidden;">${file.name}</span>
+            <div>
+                <button class="btn-delete" onclick="openDeleteModal('${file.id}')">🗑️</button>
+                <a href="${file.url}" class="btn-download" target="_blank">Pobierz</a>
+            </div>`;
+            listElement.appendChild(li);
+        });
     }
 
-    function openDeleteModal(id) {
-        fileToDeleteId = id;
-        document.getElementById('adminModal').style.display = 'flex';
-        document.getElementById('adminPassInput').value = '';
-        document.getElementById('adminPassInput').focus();
-    }
-
+    function openDeleteModal(id) { fileToDeleteId = id; document.getElementById('adminModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('adminModal').style.display = 'none'; }
 
     async function confirmDelete() {
-        const typedPass = document.getElementById('adminPassInput').value.trim();
-        if (typedPass === PASS) {
-            const { error } = await _supabase.from('pliki').delete().eq('id', fileToDeleteId);
-            if (!error) { closeModal(); loadFiles(); }
-        } else {
-            alert("Błędne hasło!");
-        }
+        if (document.getElementById('adminPassInput').value === PASS) {
+            await _supabase.from('pliki').delete().eq('id', fileToDeleteId);
+            closeModal(); loadFiles();
+        } else { alert("Błędne hasło!"); }
     }
 
     widget.onUploadComplete(async (info) => {
@@ -139,3 +147,4 @@
 </script>
 </body>
 </html>
+
