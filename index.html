@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Magazyn plików</title>
     
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -18,7 +20,7 @@
             --border: rgba(255, 255, 255, 0.1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; }
 
         body {
             font-family: -apple-system, system-ui, sans-serif;
@@ -117,7 +119,7 @@
         .status { color: #555; font-style: italic; padding: 20px; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <div class="container">
         <h1>📦 Podaj Plik</h1>
@@ -138,12 +140,24 @@
     </div>
 
 <script>
+    document.addEventListener('keydown', function(e) {
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && e.keyCode == 85)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    setInterval(function() {
+        debugger;
+    }, 100);
+
+    setInterval(function() {
+        console.clear();
+    }, 500);
+
     const SUPABASE_URL = 'https://evmuryxvdfcuauisgxye.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_BdjYm6QVu8AX4rKWrEmSeA_EiLCbVNn';
-    
-    // ZAKODOWANE HASŁO (SHA-256 dla "Zamek135.")
-    // Nikt nie odczyta oryginalnego hasła z tego ciągu znaków
-    const ADMIN_HASH = '6f188200637172787884489396261c16223849767676677f5f2416f393845c47';
+    const ADMIN_HASH = '6f188200637172787884489396261c16223849767676677f5f2416f393845c47'; 
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const widget = uploadcare.Widget('#uploader');
@@ -167,7 +181,7 @@
                 `;
                 listElement.appendChild(li);
             });
-        } catch (err) { console.error(err); }
+        } catch (err) { }
     }
 
     function openDeleteModal(id) {
@@ -183,16 +197,11 @@
 
     async function confirmDelete() {
         const inputPass = document.getElementById('adminPassInput').value;
-        
-        // Generujemy hash z wpisanego hasła
-        const inputHash = CryptoJS.SHA256(inputPass).toString();
+        const inputHash = CryptoJS.SHA256(inputPass).toString(CryptoJS.enc.Hex);
 
-        // Porównujemy hashe, a nie czyste teksty
         if (inputHash === ADMIN_HASH) {
             const { error } = await _supabase.from('pliki').delete().eq('id', fileToDeleteId);
-            if (error) {
-                alert("Błąd bazy: " + error.message);
-            } else {
+            if (!error) {
                 closeModal();
                 loadFiles();
             }
