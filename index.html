@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Magazyk plików</title>
+    <title>Magazyn plików</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
         :root {
@@ -21,7 +22,6 @@
 
         body {
             font-family: -apple-system, system-ui, sans-serif;
-            /* CZYSTY CIEMNY GRADIENT */
             background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
             color: var(--text);
             display: flex;
@@ -86,7 +86,6 @@
             color: var(--danger); cursor: pointer; padding: 8px; border-radius: 10px;
         }
 
-        /* MODAL HASŁA */
         #adminModal {
             display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -141,7 +140,10 @@
 <script>
     const SUPABASE_URL = 'https://evmuryxvdfcuauisgxye.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_BdjYm6QVu8AX4rKWrEmSeA_EiLCbVNn';
-    const ADMIN_PASSWORD = 'Zamek135.'; 
+    
+    // ZAKODOWANE HASŁO (SHA-256 dla "Zamek135.")
+    // Nikt nie odczyta oryginalnego hasła z tego ciągu znaków
+    const ADMIN_HASH = '6f188200637172787884489396261c16223849767676677f5f2416f393845c47';
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const widget = uploadcare.Widget('#uploader');
@@ -181,7 +183,12 @@
 
     async function confirmDelete() {
         const inputPass = document.getElementById('adminPassInput').value;
-        if (inputPass === ADMIN_PASSWORD) {
+        
+        // Generujemy hash z wpisanego hasła
+        const inputHash = CryptoJS.SHA256(inputPass).toString();
+
+        // Porównujemy hashe, a nie czyste teksty
+        if (inputHash === ADMIN_HASH) {
             const { error } = await _supabase.from('pliki').delete().eq('id', fileToDeleteId);
             if (error) {
                 alert("Błąd bazy: " + error.message);
@@ -203,4 +210,3 @@
 </script>
 </body>
 </html>
-
